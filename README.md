@@ -11,6 +11,10 @@ elasticsearch manager，基于Elasticsearch的知识库管理和搜索的后端�
 - docs: http://127.0.0.1:8080/docs
 - redoc: http://127.0.0.1:8080/redoc
 
+### Docs
+
+![docs](static/docs.jpeg)
+
 ### 核心接口
 
 #### Manage
@@ -19,16 +23,7 @@ elasticsearch manager，基于Elasticsearch的知识库管理和搜索的后端�
 
 地址：http://127.0.0.1:8080/manage
 
-参数例子：dict(_index='tmp_index', _id='tmp_id', _source=dict(content='你好！这是智能搜索引擎。'))
-
-##### query Parameters
-
-| key      | value                                                  |
-|----------|--------------------------------------------------------|
-| \_index  | any ( Index)<br />Default: "tmp\_index"<br /><br />    |
-| \_id     | any ( Id)<br />Default: "tmp\_id"<br /><br />          |
-| content  | any (Content)<br />Default: "你好！这是智能搜索引擎。"<br /><br /> |
-| \_source | any ( Source)<br />Default: "{}"                       |
+![manage](static/manage.png)
 
 #### Search
 
@@ -36,16 +31,8 @@ elasticsearch manager，基于Elasticsearch的知识库管理和搜索的后端�
 
 地址：http://127.0.0.1:8080/search
 
-参数例子：dict(_index='tmp_index', query='你好')
+![search](static/search.png)
 
-##### query Parameters
-
-| key       | value                                               |
-|-----------|-----------------------------------------------------|
-| \_index   | any ( Index)<br />Default: "tmp\_index"<br /><br /> |
-| query     | any (Query)<br />Default: "你好"<br /><br />          |
-| topn      | any (Topn)<br />Default: 3<br /><br />              |
-| threshold | any (Threshold)<br />Default: 0.5                   |
 
 ## 部署
 
@@ -53,12 +40,14 @@ elasticsearch manager，基于Elasticsearch的知识库管理和搜索的后端�
 
 ### 方式1：用docker-compose部署（推荐）
 
+先自行安装docker和docker-compose，然后可用`docker-compose --help`查看相关命令，用例如`docker-compose up --help`查看相关命令的参数。
+
 ```shell
 ### 开启服务
 docker-compose up -d --force-recreate --build
 
 ### 查看日志
-docker-compose log -f
+docker-compose logs -f
 
 ### 关闭服务
 docker-compose down
