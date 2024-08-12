@@ -1,0 +1,70 @@
+version: '3.5'
+
+# 服务配置
+services:
+  handler:
+    container_name: esman-handler
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - elastic_net
+    environment:
+      ES_URL: 'http://127.0.0.1:9200'
+      ES_AUTH_USERNAME: 'elastic'
+      ES_AUTH_PASSWORD: ''
+      LOG_PATH: '/app/mnt/logs/esman.log'
+      ES_INDEX_FREQ: 'esman-MONTHLY'
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - "./mnt/logs:/app/mnt/logs"
+
+  elasticsearch:
+    container_name: esman-elasticsearch
+    #image: elasticsearch:8.12.2
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+    restart: unless-stopped
+    environment:
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+      - "TZ=Asia/Shanghai"
+      - "discovery.type=single-node"
+      #- "ELASTIC_PASSWORD=cloud52128"
+      #- "xpack.security.enabled=true"
+      - "xpack.security.enabled=false"
+      - "xpack.security.http.ssl.enabled=false"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      # - ./config:/usr/share/elasticsearch/config
+      - ./mnt/data:/usr/share/elasticsearch/data
+      - ./mnt/plugins:/usr/share/elasticsearch/plugins
+    networks:
+      - elastic_net
+
+  kibana:
+    container_name: esman-kibana
+    #image: kibana:8.12.2
+    image: docker.elastic.co/kibana/kibana:8.12.2
+    restart: unless-stopped
+    environment:
+      - "TZ=Asia/Shanghai"
+      - "I18N_LOCALE=zh-CN"
+      - "ELASTICSEARCH_HOSTS=http://127.0.0.1:9200"
+      #- "ELASTICSEARCH_USERNAME=elastic"
+      #- "ELASTICSEARCH_PASSWORD=123456"
+    ports:
+      - "5601:5601"
+    #volumes:
+    #- ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml
+    networks:
+      - elastic_net
+    depends_on:
+      - elasticsearch
+
+# 网络配置
+networks:
+  elastic_net:
+    driver: bridge

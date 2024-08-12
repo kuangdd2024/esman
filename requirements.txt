@@ -1,0 +1,5 @@
+elasticsearch==8.12.1
+fastapi[all]==0.92.0
+Requests
+simhash
+tqdm
