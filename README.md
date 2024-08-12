@@ -11,7 +11,7 @@ elasticsearch manager，基于Elasticsearch的知识库管理和搜索的后端�
 - docs: http://127.0.0.1:8080/docs
 - redoc: http://127.0.0.1:8080/redoc
 
-### Docs
+#### Docs
 
 ![docs](static/docs.jpeg)
 
@@ -59,7 +59,7 @@ docker-compose down
 
 ```shell
 ### 创建镜像
-docker build -t esman:v0.1 .
+docker build -t esman:v1.0 .
 
 ### 部署容器
 docker run -id --name esman --net elastic -p 8080:8080 -e "ES_URL=http://127.0.0.1:9200" -e "ES_INDEX_FREQ=esman-MONTHLY" -t esman:latest
