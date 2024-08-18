@@ -83,3 +83,14 @@ docker run -id --name elasticsearch --net elastic -p 9200:9200 -p 9300:9300 -e "
 docker pull docker.elastic.co/kibana/kibana:$version
 docker run --name kibana --net elastic -p 5601:5601 docker.elastic.co/kibana/kibana:$version
 ```
+
+## 记录
+
+### done
+- [x] 支持调用Embedding的接口得到特征向量
+- [x] 支持传入知识的时候传入Embedding向量，并且可用search_knowledge_by_embedding来搜索知识，简化流程
+
+### todo
+- [ ] 参数用环境变量控制，增加.env的环境变量文件
+- [ ] 增加调用大语言模型整合搜索的结果，启用RAG策略
+- [ ] Elasticsearch部署增加密码鉴权，加强安全性

@@ -10,14 +10,14 @@ services:
     networks:
       - elastic_net
     environment:
-      ES_URL: 'http://127.0.0.1:9200'
-      ES_AUTH_USERNAME: 'elastic'
-      ES_AUTH_PASSWORD: ''
+      ES_URL: 'http://localhost:6040'
+      # ES_AUTH_USERNAME: 'elastic'
+      # ES_AUTH_PASSWORD: ''
       LOG_PATH: '/app/mnt/logs/esman.log'
       ES_INDEX_FREQ: 'esman-MONTHLY'
     restart: always
     ports:
-      - "8080:8080"
+      - "7043:8080"
     volumes:
       - "./mnt/logs:/app/mnt/logs"
 
@@ -35,8 +35,8 @@ services:
       - "xpack.security.enabled=false"
       - "xpack.security.http.ssl.enabled=false"
     ports:
-      - "9200:9200"
-      - "9300:9300"
+      - "7040:9200"
+      - "7041:9300"
     volumes:
       # - ./config:/usr/share/elasticsearch/config
       - ./mnt/data:/usr/share/elasticsearch/data
@@ -52,11 +52,11 @@ services:
     environment:
       - "TZ=Asia/Shanghai"
       - "I18N_LOCALE=zh-CN"
-      - "ELASTICSEARCH_HOSTS=http://127.0.0.1:9200"
+      - "ELASTICSEARCH_HOSTS=http://localhost:6040"
       #- "ELASTICSEARCH_USERNAME=elastic"
       #- "ELASTICSEARCH_PASSWORD=123456"
     ports:
-      - "5601:5601"
+      - "7042:5601"
     #volumes:
     #- ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml
     networks:

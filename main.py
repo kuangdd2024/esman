@@ -5,9 +5,11 @@
 import base64
 import hashlib
 import json
+import logging
 import re
 import os
 
+import requests
 import simhash
 from elasticsearch import Elasticsearch
 import tqdm
@@ -18,9 +20,15 @@ import tqdm
 
 from fastapi_fixer import app
 
-_embedding_dims = 32  # 确保和向量模型的维数相同，这里用simhash，维数为32
+_embedding_api = 'http://localhost:6048/v1/embeddings'
+_embedding_model = "bge-m3"
+_embedding_dims = 1024  # 外部传入，暂定1024
 
-_es_url = os.environ.get('ES_URL', 'http://127.0.0.1:9200')
+_vector_dims = _embedding_dims  # 确保和向量模型的维数相同，这里用simhash，维数为32
+
+_chat_api = 'http://localhost:6048/v1/chat/completions'
+
+_es_url = os.environ.get('ES_URL', 'http://localhost:6040')
 _username = os.environ.get('ES_AUTH_USERNAME', 'elastic')
 _password = os.environ.get('ES_AUTH_PASSWORD', '')
 client = Elasticsearch(_es_url, basic_auth=(_username, _password))
@@ -221,7 +229,13 @@ def create_kindex(_index):
             },
             "answer": {
                 "type": "text"
-            }
+            },
+            "embedding": {
+                "type": "dense_vector",
+                "dims": _embedding_dims,  # 768,
+                "index": True,
+                "similarity": "cosine"
+            },
         }
     }
     return client.indices.create(index=_index, mappings=mappings)
@@ -304,7 +318,7 @@ def create_findex(_index):
         "properties": {
             "vector": {
                 "type": "dense_vector",
-                "dims": _embedding_dims,  # 768,
+                "dims": _vector_dims,  # 768,
                 "index": True,
                 "similarity": "cosine"
             },
@@ -407,6 +421,23 @@ def check_knowledge(_index, _source):
     return result["hits"]["hits"]
 
 
+@app.post("/search_knowledge_by_embedding")
+def search_knowledge_by_embedding(_index, _source):
+    """根据向量搜索知识。topn=10, embedding=[0.5, 1.2, ...]"""
+    body = {
+        "knn": {
+            "field": "embedding",
+            "query_vector": _source['embedding'],
+            "k": _source.get('topn', 10),
+            "num_candidates": 100,
+            "boost": 1
+        },
+        "_source": ["content", "answer"]
+    }
+    result = client.search(index=_index, **body)
+    return result["hits"]["hits"]
+
+
 @app.post("/convert_text_to_id")
 def convert_text_to_id(text):
     """文本转ID，文本和ID一一对应。"""
@@ -423,11 +454,22 @@ def convert_text_to_vector(text):
     # vec = [eval(f'0x{w}') for w in vec_hex]
 
     # simhash
-    vec_bin = bin(simhash.Simhash(text, _embedding_dims).value)
-    vec_bin = vec_bin[2:].rjust(_embedding_dims, '0')
-    vec = [int(w) for w in vec_bin]
+    # vec_bin = bin(simhash.Simhash(text, _vector_dims).value)
+    # vec_bin = vec_bin[2:].rjust(_vector_dims, '0')
+    # vec = [int(w) for w in vec_bin]
 
-    # todo 文本向量化，调用接口
+    data = {
+        "input": text,
+        "model": _embedding_model,
+    }
+
+    response = requests.post(_embedding_api, json=data)
+    if response.status_code == 200:
+        vec = response.json()['data'][0]['embedding']
+    else:
+        logging.error('Embedding失败！！！请核对！！！')
+        vec = [0 for w in range(_embedding_dims)]
+
     return vec
 
 
